@@ -17,14 +17,20 @@ class Project():
 
 
 _PROJECTS = []
-_PROJECTS_TEST = [
+_PROJECTS_1 = [
     Project("Go", 10, 25),
-    Project("Unity", 20, 40),
+    Project("Unity", 20, 50),
     Project("Computer Vision", 7, 30),
-    Project("PFE", 30, 45),
+    Project("PFE", 30, 100),
     Project("Ingénierie logicielle IA", 5, 25), 
-    Project("TPs LS", 15, 25),
-    Project("Reinforcement Learning", 10, 50)
+    Project("TPs LS", 5, 10),
+    Project("Reinforcement Learning", 5, 55)
+]
+
+_PROJECTS_2 = [
+    Project("GO", 5, 5),
+    Project("Unity", 5, 10),
+    Project("PFE", 30, 40)
 ]
 
 # Simulation parameters class
@@ -47,7 +53,7 @@ class Configuration():
 
 add = False
 if not add:
-    _PROJECTS = _PROJECTS_TEST
+    _PROJECTS = _PROJECTS_2
 
 while (add):
     project_name = input("What's your project's name ?: ")
@@ -110,7 +116,7 @@ class ChromosomeProjects(Chromosome):
         self._value = config.PROJECTS
         random.shuffle(self._value)
         
-    def fitness(self):
+    def fitness(self, verbose=False):
         global config
         
         f = 0
@@ -120,13 +126,20 @@ class ChromosomeProjects(Chromosome):
         # Do the projects in the current order
         # Get +1 if the project is done in time
         # Get -d with d the delay days
-        for p in tmp_projects:
+        for i in range(config.NB_PROJECTS):
+            p = tmp_projects[i]
             diff = (p._deadline - p._duration)
+            if verbose:
+                print(f"deadline = {p._deadline}")
+                print(f"duration = {p._duration}")
+                print(f"diff = {diff}")
             if (diff >= 0):
                 f += 1
             else: 
                 f += diff
             
+            if verbose:
+                print("f = ", f)
             # Substract the consumed time on the current project to the remaining ones
             tmp_projects = list(map(lambda x: Project(x._name, x._duration, x._deadline - p._duration), tmp_projects))
         
@@ -261,6 +274,10 @@ class Population():
 
 def recap(best):
     
+    print(f"fitness = {best._fitness}")
+    best.fitness()
+    print(f"fitness = {best._fitness}")
+    
     print(f"According to what you said, you have {len(_PROJECTS)} projects to do.")
     print("We suggest you to do them in the following order:")
     
@@ -283,6 +300,8 @@ for i in range(config.POPULATIONS):
         population.oneGeneration()
      
     # Best candidate in this population
+    #print(population)
+    #print("")
     local_best = population._population[0]
     
     # Compare local best to global best and update
@@ -292,11 +311,14 @@ for i in range(config.POPULATIONS):
         best_iteration = i
         parameters = config.RANDOMSEED,config.POPULATIONSIZE,config.MUTATIONRATE
         
+        
     # Randomly explore new parameters
     config.RANDOMSEED = random.randint(10000,99999)
     config.POPULATIONSIZE = random.randint(20,80)
     config.MUTATIONRATE = random.randint(1,15)
 
+print(best)
+print(best_fitness)
 recap(best)
 
 
