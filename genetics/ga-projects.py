@@ -53,7 +53,7 @@ class Configuration():
 
 add = False
 if not add:
-    _PROJECTS = _PROJECTS_2
+    _PROJECTS = _PROJECTS_1
 
 while (add):
     project_name = input("What's your project's name ?: ")
@@ -110,13 +110,14 @@ class ChromosomeProjects(Chromosome):
     
     def __init__(self, initialValue=None):      
         super().__init__(initialValue)
+        self.fitness()
 
     def _initRandomOne(self):
         global config      
-        self._value = config.PROJECTS
+        self._value = config.PROJECTS.copy()
         random.shuffle(self._value)
         
-    def fitness(self, verbose=False):
+    def fitness(self):
         global config
         
         f = 0
@@ -129,29 +130,23 @@ class ChromosomeProjects(Chromosome):
         for i in range(config.NB_PROJECTS):
             p = tmp_projects[i]
             diff = (p._deadline - p._duration)
-            if verbose:
-                print(f"deadline = {p._deadline}")
-                print(f"duration = {p._duration}")
-                print(f"diff = {diff}")
+                
             if (diff >= 0):
                 f += 1
             else: 
                 f += diff
-            
-            if verbose:
-                print("f = ", f)
+
             # Substract the consumed time on the current project to the remaining ones
             tmp_projects = list(map(lambda x: Project(x._name, x._duration, x._deadline - p._duration), tmp_projects))
         
         # Store this computation for eventual later use
-        self._fitness = f
-        return f        
+        self._fitness = f        
             
     def reproduceWith(self, other):
         global config 
 
         # Each child mainly inherits its value from 1 parent
-        children = [ChromosomeProjects(self._value), ChromosomeProjects(other._value)]
+        children = [ChromosomeProjects(self._value.copy()), ChromosomeProjects(other._value.copy())]
         
         # Then force one aspect of the parent it doesn't inherits
         
@@ -174,6 +169,10 @@ class ChromosomeProjects(Chromosome):
         children[1][index_p2] = children[1][index_p2_in_p1]
         children[1][index_p2_in_p1] = p2
         
+        # Update children fitness
+        children[0].fitness()
+        children[1].fitness()
+        
         return children
     
     def mutation(self):
@@ -190,6 +189,8 @@ class ChromosomeProjects(Chromosome):
         tmp = self._value[i1]
         self._value[i1] = self._value[i2]
         self._value[i2] = tmp
+        
+        self.fitness()
           
 
     def __repr__(self):
@@ -198,9 +199,9 @@ class ChromosomeProjects(Chromosome):
         toret = "[" + self._value[0]._name
         
         for i in range(1, config.NB_PROJECTS):
-            toret += ", " + self._value[i]._name
+            toret += ", " + self._value[i]._name 
         
-        toret += "]"
+        toret += " (" + str(self._fitness) + ")]"
         
         return toret
     
@@ -229,7 +230,7 @@ class Population():
         
     def oneGeneration(self):
         global config
-        
+            
         # Select a sample of our population to create the new one
         newpop = self._population[:4]
         while len(newpop) < len(self):
@@ -254,17 +255,17 @@ class Population():
         
         if taboo is not None:   
             tmp.remove(taboo)
-            
+        
         return tmp[random.randint(0, len(tmp)-1)]
 
     # Sort individuals by fitness to have easy access to the best one
     def _sort(self):
-        self._population.sort(key=lambda x: x.fitness(), reverse=True)
+        self._population.sort(key=lambda x: x._fitness, reverse=True)
     
     def __repr__(self):
         toret = ""
         for i in self._population:
-            toret += i.__repr__() + " (f="+ str(int(i.fitness()))+")\n"
+            toret += i.__repr__() + " (f="+ str(int(i._fitness))+")\n"
         return toret
 
     def __len__(self):
@@ -273,10 +274,6 @@ class Population():
         
 
 def recap(best):
-    
-    print(f"fitness = {best._fitness}")
-    best.fitness()
-    print(f"fitness = {best._fitness}")
     
     print(f"According to what you said, you have {len(_PROJECTS)} projects to do.")
     print("We suggest you to do them in the following order:")
@@ -300,8 +297,6 @@ for i in range(config.POPULATIONS):
         population.oneGeneration()
      
     # Best candidate in this population
-    #print(population)
-    #print("")
     local_best = population._population[0]
     
     # Compare local best to global best and update
@@ -317,8 +312,5 @@ for i in range(config.POPULATIONS):
     config.POPULATIONSIZE = random.randint(20,80)
     config.MUTATIONRATE = random.randint(1,15)
 
-print(best)
-print(best_fitness)
 recap(best)
-
 
