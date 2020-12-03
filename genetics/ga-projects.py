@@ -21,7 +21,7 @@ _PROJECTS_1 = [
     Project("Go", 10, 25),
     Project("Unity", 20, 50),
     Project("Computer Vision", 7, 30),
-    Project("PFE", 30, 100),
+    Project("PFE", 30, 80),
     Project("Ingénierie logicielle IA", 5, 25), 
     Project("TPs LS", 5, 10),
     Project("Reinforcement Learning", 5, 55)
@@ -36,12 +36,12 @@ _PROJECTS_2 = [
 # Simulation parameters class
 class Configuration():
     RANDOMSEED = 12345
-    POPULATIONSIZE = 50
+    POPULATIONSIZE = 20
     MUTATIONRATE = 5 # 5% de mutation rate
     PROJECTS = _PROJECTS
     NB_PROJECTS = len(_PROJECTS)
-    POPULATIONS = 100
-    GENERATIONS = 100
+    POPULATIONS = 50
+    GENERATIONS = 50
 
     def __init__(self, projects=None):
         random.seed(self.RANDOMSEED)
@@ -275,11 +275,21 @@ class Population():
 
 def recap(best):
     
-    print(f"According to what you said, you have {len(_PROJECTS)} projects to do.")
+    date = 0
+
+    print(f"\nAccording to what you said, you have {len(_PROJECTS)} projects to do.")
     print("We suggest you to do them in the following order:")
     
     for i, p in enumerate(best._value):
-        print(f"{i+1}) Project {p._name} / duration : {p._duration} day(s), deadline : {p._deadline} day(s)" )
+        date += p._duration
+        print(f"\n{i+1}) Project {p._name}")
+        print(f"          --> It will take approximately {p._duration} day(s)")
+        print(f"          --> The work is due in {p._deadline} day(s)")
+        if p._deadline - date >= 0:
+            print(f"          ==> It will be finished on day {date}, {p._deadline - date} day(s) in advance")
+        else:
+            print(f"          ==> It will be finished on day {date}, {abs(p._deadline - date)} day(s) late")
+
             
     
 # Randomly change parameters to get better results
