@@ -2,6 +2,7 @@ import random
 import numpy as np
 import array
 
+
 # Data class for a project
 class Project():
     
@@ -14,11 +15,45 @@ class Project():
     def __repr__(self):
         return "Project " + self._name + " wil take about " + str(self._duration) + " day(s) of work and is due in " + str(self._deadline) + " day(s)."
 
+
+_PROJECTS = []
+_PROJECTS_1 = [
+    Project("Go", 10, 25),
+    Project("Unity", 20, 50),
+    Project("Computer Vision", 7, 30),
+    Project("PFE", 30, 100),
+    Project("Ingénierie logicielle IA", 5, 25), 
+    Project("TPs LS", 5, 10),
+    Project("Reinforcement Learning", 5, 55)
+]
+
+_PROJECTS_2 = [
+    Project("GO", 5, 5),
+    Project("Unity", 5, 10),
+    Project("PFE", 30, 40)
+]
+
+# Simulation parameters class
+class Configuration():
+    RANDOMSEED = 12345
+    POPULATIONSIZE = 50
+    MUTATIONRATE = 5 # 5% de mutation rate
+    PROJECTS = _PROJECTS
+    NB_PROJECTS = len(_PROJECTS)
+    POPULATIONS = 100
+    GENERATIONS = 100
+
+    def __init__(self, projects=None):
+        random.seed(self.RANDOMSEED)
+        if projects is not None:
+            self.PROJECTS = projects
+            self.NB_PROJECTS = len(projects)
     
 # Loop to retrieve user's projects list
 
-_PROJECTS = []
-add = True
+add = False
+if not add:
+    _PROJECTS = _PROJECTS_2
 
 while (add):
     project_name = input("What's your project's name ?: ")
@@ -29,25 +64,13 @@ while (add):
     _PROJECTS.append(Project(project_name, project_duration, project_deadline))
     
     answer = ""
-    while (answer not in ["Yes", "No"]):
-        answer = input("Project " + project_name + " successfully added, add another one? (Yes or No): ")
+    while (answer not in ["YES", "NO"]):
+        answer = input("Project " + project_name + " successfully added, add another one? (Yes or No): ").upper()
         print("\n")
-        if answer == "No": add = False
+        if answer == "NO": add = False
     
+config = Configuration(_PROJECTS)
 
-# Simulation parameters class
-class Configuration():
-    RANDOMSEED = 12345
-    POPULATIONSIZE = 50
-    MUTATIONRATE = 5 
-    NB_PROJECTS = len(_PROJECTS)
-    POPULATIONS = 100
-    GENERATIONS = 100
-
-    def __init__(self):
-        random.seed(self.RANDOMSEED)
-
-config = Configuration()
 
 # Chromosome Interface
 class Chromosome:
@@ -87,8 +110,13 @@ class ChromosomeProjects(Chromosome):
     
     def __init__(self, initialValue=None):      
         super().__init__(initialValue)
+
+    def _initRandomOne(self):
+        global config      
+        self._value = config.PROJECTS
+        random.shuffle(self._value)
         
-    def fitness(self):
+    def fitness(self, verbose=False):
         global config
         
         f = 0
@@ -98,13 +126,20 @@ class ChromosomeProjects(Chromosome):
         # Do the projects in the current order
         # Get +1 if the project is done in time
         # Get -d with d the delay days
-        for p in tmp_projects:
+        for i in range(config.NB_PROJECTS):
+            p = tmp_projects[i]
             diff = (p._deadline - p._duration)
+            if verbose:
+                print(f"deadline = {p._deadline}")
+                print(f"duration = {p._duration}")
+                print(f"diff = {diff}")
             if (diff >= 0):
                 f += 1
             else: 
                 f += diff
             
+            if verbose:
+                print("f = ", f)
             # Substract the consumed time on the current project to the remaining ones
             tmp_projects = list(map(lambda x: Project(x._name, x._duration, x._deadline - p._duration), tmp_projects))
         
@@ -128,7 +163,7 @@ class ChromosomeProjects(Chromosome):
         p1 = self._value[index_p1]
         p2 = other._value[index_p2]
         
-        # Index of random project in other member
+        # Index of random project in the other parent
         index_p1_in_p2 = other._value.index(p1)
         index_p2_in_p1 = self._value.index(p2)
         
@@ -150,16 +185,12 @@ class ChromosomeProjects(Chromosome):
         i1 = random.choice(indexes)
         indexes.remove(i1)
         i2 = random.choice(indexes)
-        
+  
         # Swap values
         tmp = self._value[i1]
         self._value[i1] = self._value[i2]
         self._value[i2] = tmp
-        
-    def _initRandomOne(self):        
-        self._value = _PROJECTS
-        random.shuffle(self._value)
-      
+          
 
     def __repr__(self):
         global config
@@ -207,7 +238,7 @@ class Population():
             i1 = self.randomSelect()
             i2 = self.randomSelect(i1)
             for newson in i1.reproduceWith(i2):
-                if random.randint(0,100) < config.MUTATIONRATE:
+                if random.randint(0,100) < config.MUTATIONRATE and config.NB_PROJECTS > 1:
                     newson.mutation()
                 newpop.append(newson)
                 
@@ -243,11 +274,15 @@ class Population():
 
 def recap(best):
     
+    print(f"fitness = {best._fitness}")
+    best.fitness()
+    print(f"fitness = {best._fitness}")
+    
     print(f"According to what you said, you have {len(_PROJECTS)} projects to do.")
     print("We suggest you to do them in the following order:")
     
     for i, p in enumerate(best._value):
-        print(f"{i+1}) Project {p._name}")
+        print(f"{i+1}) Project {p._name} / duration : {p._duration} day(s), deadline : {p._deadline} day(s)" )
             
     
 # Randomly change parameters to get better results
@@ -265,6 +300,8 @@ for i in range(config.POPULATIONS):
         population.oneGeneration()
      
     # Best candidate in this population
+    #print(population)
+    #print("")
     local_best = population._population[0]
     
     # Compare local best to global best and update
@@ -274,11 +311,14 @@ for i in range(config.POPULATIONS):
         best_iteration = i
         parameters = config.RANDOMSEED,config.POPULATIONSIZE,config.MUTATIONRATE
         
+        
     # Randomly explore new parameters
     config.RANDOMSEED = random.randint(10000,99999)
     config.POPULATIONSIZE = random.randint(20,80)
     config.MUTATIONRATE = random.randint(1,15)
 
+print(best)
+print(best_fitness)
 recap(best)
 
 
