@@ -39,7 +39,7 @@ while (add):
 class Configuration():
     RANDOMSEED = 12345
     POPULATIONSIZE = 50
-    MUTATIONRATE = 5 # 5% de mutation rate
+    MUTATIONRATE = 5 
     NB_PROJECTS = len(_PROJECTS)
     POPULATIONS = 100
     GENERATIONS = 100
