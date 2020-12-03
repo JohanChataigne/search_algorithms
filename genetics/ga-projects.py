@@ -1,6 +1,7 @@
 import random
 import numpy as np
 import array
+import math
 
 
 # Data class for a project
@@ -17,13 +18,18 @@ class Project():
 
 
 _PROJECTS = []
+
+# Tests bunches of projects
 _PROJECTS_1 = [
     Project("Go", 10, 25),
     Project("Unity", 20, 50),
     Project("Computer Vision", 7, 30),
     Project("PFE", 30, 80),
     Project("Ingénierie logicielle IA", 5, 25), 
-    Project("TPs LS", 5, 10),
+    Project("TP AlgosRecherche", 1, 20),
+    Project("TP Repr Connaissances", 1, 20), 
+    Project("TP SMAC", 1, 20), 
+    Project("TP JV", 1, 20),
     Project("Reinforcement Learning", 5, 55)
 ]
 
@@ -299,9 +305,7 @@ def recap(best):
     
 # Randomly change parameters to get better results
 best = None
-best_fitness = 0 
-best_iteration = 0
-parameters = (config.RANDOMSEED, config.POPULATIONSIZE, config.MUTATIONRATE)
+best_fitness = -math.inf
 
 # Solve problem with multiple populations
 for i in range(config.POPULATIONS):
@@ -318,14 +322,8 @@ for i in range(config.POPULATIONS):
     if (local_best._fitness > best_fitness):
         best = local_best
         best_fitness = local_best._fitness
-        best_iteration = i
-        parameters = config.RANDOMSEED,config.POPULATIONSIZE,config.MUTATIONRATE
         
-        
-    # Randomly explore new parameters
-    config.RANDOMSEED = random.randint(10000,99999)
-    config.POPULATIONSIZE = random.randint(20,80)
-    config.MUTATIONRATE = random.randint(1,15)
+    
 
 recap(best)
 
