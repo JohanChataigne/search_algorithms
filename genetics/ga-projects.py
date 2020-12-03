@@ -36,7 +36,7 @@ _PROJECTS_2 = [
 # Simulation parameters class
 class Configuration():
     RANDOMSEED = 12345
-    POPULATIONSIZE = 20
+    POPULATIONSIZE = 50
     MUTATIONRATE = 5 # 5% de mutation rate
     PROJECTS = _PROJECTS
     NB_PROJECTS = len(_PROJECTS)
@@ -276,6 +276,8 @@ class Population():
 def recap(best):
     
     date = 0
+    advance = 0
+    late = 0
 
     print(f"\nAccording to what you said, you have {len(_PROJECTS)} projects to do.")
     print("We suggest you to do them in the following order:")
@@ -287,10 +289,13 @@ def recap(best):
         print(f"          --> The work is due in {p._deadline} day(s)")
         if p._deadline - date >= 0:
             print(f"          ==> It will be finished on day {date}, {p._deadline - date} day(s) in advance")
+            advance += 1
         else:
             print(f"          ==> It will be finished on day {date}, {abs(p._deadline - date)} day(s) late")
+            late += 1
 
-            
+    print(f"\n==> With this schedule you would submit {advance} project(s) in advance and {late} project(s) late")
+        
     
 # Randomly change parameters to get better results
 best = None
