@@ -1,6 +1,7 @@
 import random
 import numpy as np
 import array
+import getopt, sys
 
 
 # Data class for a project
@@ -17,7 +18,8 @@ class Project():
 
 
 _PROJECTS = []
-_PROJECTS_1 = [
+
+_PROJECTS_TEST = [
     Project("Go", 10, 25),
     Project("Unity", 20, 50),
     Project("Computer Vision", 7, 30),
@@ -27,11 +29,6 @@ _PROJECTS_1 = [
     Project("Reinforcement Learning", 5, 55)
 ]
 
-_PROJECTS_2 = [
-    Project("GO", 5, 5),
-    Project("Unity", 5, 10),
-    Project("PFE", 30, 40)
-]
 
 # Simulation parameters class
 class Configuration():
@@ -48,12 +45,30 @@ class Configuration():
         if projects is not None:
             self.PROJECTS = projects
             self.NB_PROJECTS = len(projects)
-    
-# Loop to retrieve user's projects list
+            
 
-add = False
+add = True
+
+# Handle test mode
+
+argumentList = sys.argv[1:]
+options = "t"
+long_options = ["test"]
+
+try:
+    arguments, _ = getopt.getopt(argumentList, options, long_options)
+    
+    for argument, value in arguments:
+        if argument in ("-t", "--test"):
+            add = False
+            
+except getopt.error as err:
+    print (str(err))
+
 if not add:
-    _PROJECTS = _PROJECTS_1
+    _PROJECTS = _PROJECTS_TEST
+
+# Loop to retrieve user's projects list
 
 while (add):
     project_name = input("What's your project's name ?: ")
