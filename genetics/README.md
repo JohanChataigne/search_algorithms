@@ -3,6 +3,8 @@ Authors: [Germon Paul](https://github.com/pgermon) and [Chataigner Johan](https:
 
 ## Introduction
 
+![Program demo with test projects](images/screen.png)
+
 This project tries to compute an optimal schedule given a list of projects with their duration and deadline.
 
 To do so, the program uses a genetic algorithm.
@@ -20,7 +22,8 @@ To continue, for **one generation** in a population, the next generation is crea
 
 To finish, the solution answered by the program for your custom problem is the best found among multiple populations after multiple generations. These values can be changed in the `Configuration()` class, as well as the mutation rate.
 
-## Run command
- Run `python3 ./ga-projects`
+## Run commands
+-`make` to run the program with your custom projects
+-`make test` to run it on test projects
 
 
