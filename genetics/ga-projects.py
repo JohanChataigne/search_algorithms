@@ -2,6 +2,7 @@ import random
 import numpy as np
 import array
 import getopt, sys
+import math
 
 # Data class for a project
 class Project():
