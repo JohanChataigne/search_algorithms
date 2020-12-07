@@ -3,7 +3,6 @@ import numpy as np
 import array
 import getopt, sys
 
-
 # Data class for a project
 class Project():
     
@@ -23,9 +22,12 @@ _PROJECTS_TEST = [
     Project("Go", 10, 25),
     Project("Unity", 20, 50),
     Project("Computer Vision", 7, 30),
-    Project("PFE", 30, 100),
+    Project("PFE", 30, 80),
     Project("Ingénierie logicielle IA", 5, 25), 
-    Project("TPs LS", 5, 10),
+    Project("TP AlgosRecherche", 1, 20),
+    Project("TP Repr Connaissances", 1, 20), 
+    Project("TP SMAC", 1, 20), 
+    Project("TP JV", 1, 20),
     Project("Reinforcement Learning", 5, 55)
 ]
 
@@ -37,8 +39,8 @@ class Configuration():
     MUTATIONRATE = 5 # 5% de mutation rate
     PROJECTS = _PROJECTS
     NB_PROJECTS = len(_PROJECTS)
-    POPULATIONS = 100
-    GENERATIONS = 100
+    POPULATIONS = 50
+    GENERATIONS = 50
 
     def __init__(self, projects=None):
         random.seed(self.RANDOMSEED)
@@ -290,18 +292,31 @@ class Population():
 
 def recap(best):
     
-    print(f"According to what you said, you have {len(_PROJECTS)} projects to do.")
+    date = 0
+    advance = 0
+    late = 0
+
+    print(f"\nAccording to what you said, you have {len(_PROJECTS)} projects to do.")
     print("We suggest you to do them in the following order:")
     
     for i, p in enumerate(best._value):
-        print(f"{i+1}) Project {p._name} / duration : {p._duration} day(s), deadline : {p._deadline} day(s)" )
-            
+        date += p._duration
+        print(f"\n{i+1}) Project {p._name}")
+        print(f"          --> It will take approximately {p._duration} day(s)")
+        print(f"          --> The work is due in {p._deadline} day(s)")
+        if p._deadline - date >= 0:
+            print(f"          ==> It will be finished on day {date}, {p._deadline - date} day(s) in advance")
+            advance += 1
+        else:
+            print(f"          ==> It will be finished on day {date}, {abs(p._deadline - date)} day(s) late")
+            late += 1
+
+    print(f"\n==> With this schedule you would submit {advance} project(s) in advance and {late} project(s) late")
+        
     
 # Randomly change parameters to get better results
 best = None
-best_fitness = 0 
-best_iteration = 0
-parameters = (config.RANDOMSEED, config.POPULATIONSIZE, config.MUTATIONRATE)
+best_fitness = -math.inf
 
 # Solve problem with multiple populations
 for i in range(config.POPULATIONS):
@@ -318,14 +333,8 @@ for i in range(config.POPULATIONS):
     if (local_best._fitness > best_fitness):
         best = local_best
         best_fitness = local_best._fitness
-        best_iteration = i
-        parameters = config.RANDOMSEED,config.POPULATIONSIZE,config.MUTATIONRATE
         
-        
-    # Randomly explore new parameters
-    config.RANDOMSEED = random.randint(10000,99999)
-    config.POPULATIONSIZE = random.randint(20,80)
-    config.MUTATIONRATE = random.randint(1,15)
+    
 
 recap(best)
 
