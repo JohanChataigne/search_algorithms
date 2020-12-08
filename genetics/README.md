@@ -23,7 +23,7 @@ To continue, for **one generation** in a population, the next generation is crea
 To finish, the solution answered by the program for your custom problem is the best found among multiple populations after multiple generations. These values can be changed in the `Configuration()` class, as well as the mutation rate.
 
 ## Run commands
--`make` to run the program with your custom projects
--`make test` to run it on test projects
+- `make` to run the program with your custom projects
+- `make test` to run it on test projects
 
 
